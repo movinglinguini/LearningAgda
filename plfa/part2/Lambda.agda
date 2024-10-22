@@ -336,4 +336,64 @@ module LearningAgda.plfa.part2.Lambda where
     ; from∘to = list∘context 
     ; to∘from = context∘list }
 
-  -- Exercise complete      
+  -- Exercise complete
+
+  {-
+    LOOKUP JUDGEMENT
+  -}
+  infix 4 _∋_⦂_
+
+  data _∋_⦂_ : Context → Id → Type → Set where
+    Z : ∀ { Γ x A }
+      --------------------------
+      → Γ , x ⦂ A ∋ x ⦂ A
+
+    S : ∀ { Γ x y A  B }
+      → x ≢  y   →   Γ , x ⦂ A ∋ x ⦂ A 
+      ---------------------------------
+      → Γ , y ⦂ B ∋ x ⦂ A
+
+  {-
+    Typing Judgements
+  -}      
+  infix 4 _⊢_⦂_
+
+  data _⊢_⦂_ : Context → Term → Type → Set where
+    -- Axiom 
+    ⊢` : ∀ { Γ x A }
+      → Γ ∋ x ⦂ A
+      -------------------
+      → Γ ⊢ ` x ⦂ A
+
+    -- ⇒-I
+    ⊢ƛ : ∀ { Γ x N A B }
+      → Γ , x ⦂ A ⊢ N ⦂ B
+      -----------------------
+      → Γ ⊢ ƛ x ⇒ N ⦂ A ⇒ B
+
+    --⇒-E
+    _∙_ : ∀ { Γ L M A B }
+      → Γ ⊢ L ⦂ A ⇒ B   →   Γ ⊢ M ⦂ A
+      --------------------------------------
+      → Γ ⊢ L ∙ M ⦂ B
+
+    --ℕ-I₁
+    ⊢zero : ∀ { Γ }
+      → Γ ⊢ `zero ⦂ `ℕ
+
+    --ℕ-I₂
+    ⊢suc : ∀ { Γ M }
+      → Γ ⊢ M ⦂ `ℕ
+      --------------------
+      → Γ ⊢ `suc M ⦂ `ℕ  
+
+    --ℕ-E
+    ⊢case : ∀ { Γ L M x N A }
+      → Γ ⊢ L ⦂ `ℕ    →   Γ ⊢ M ⦂ A   →   Γ , x ⦂ `ℕ ⊢ N ⦂ A
+      ---------------------------------------------------------
+      → Γ ⊢ case L [zero⇒ M |suc x ⇒ N ] ⦂ A
+
+    ⊢μ : ∀ { Γ x M A }
+      → Γ , x ⦂ A ⊢ M ⦂ A
+      --------------------------
+      → Γ ⊢ μ x ⇒ M ⦂ A
